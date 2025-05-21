@@ -56,14 +56,26 @@ fn main() -> Result<()> {
 
 fn update_binary(check_only: bool) -> Result<()> {
     let target = self_update::get_target();
+    println!("Checking target-arch... {}", target);
+    
+    // Map Rust target triple to our asset naming convention
+    let asset_target = match target.as_str() {
+        "x86_64-apple-darwin" => "macos-amd64",
+        "aarch64-apple-darwin" => "macos-arm64",
+        "x86_64-unknown-linux-gnu" => "linux-amd64",
+        "aarch64-unknown-linux-gnu" => "linux-arm64",
+        _ => target.as_str(), // fallback to the original target
+    };
+    
     let current_version = cargo_crate_version!();
+    println!("Checking current version... v{}", current_version);
+    println!("Checking latest released version... ");
     
     let status = self_update::backends::github::Update::configure()
         .repo_owner(REPO_OWNER)
         .repo_name(REPO_NAME)
         .bin_name(BINARY_NAME)
-        .target(target)
-        // .bin_format(format!("{}-{{version}}-{}", BINARY_NAME, target))
+        .target(asset_target) // Use our mapped asset target
         .show_download_progress(true)
         .current_version(current_version)
         .build()
