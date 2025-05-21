@@ -2,7 +2,7 @@
 set -e
 
 # Constants - These should match with the constants in src/main.rs
-REPO_OWNER=${REPO_OWNER:-"your-org"}
+REPO_OWNER=${REPO_OWNER:-"zupermind"}
 REPO_NAME=${REPO_NAME:-"mcdp-binaries"}
 BINARY_NAME=${BINARY_NAME:-"mcdp-tool"}
 REPO="$REPO_OWNER/$REPO_NAME"

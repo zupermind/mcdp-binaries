@@ -21,8 +21,12 @@ jobs:
             arch: amd64
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
-            platform: linux
+            platform: linux 
             arch: arm64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            platform: macos
+            arch: amd64
           - os: macos-latest
             target: aarch64-apple-darwin
             platform: macos
@@ -30,14 +34,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
+          targets: ${{ matrix.target }}
 
       - name: Install cross-compilation tools (Linux ARM only)
         if: matrix.target == 'aarch64-unknown-linux-gnu'
@@ -46,10 +48,7 @@ jobs:
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target ${{ matrix.target }}
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Get version from tag
         id: get_version
@@ -76,7 +75,7 @@ jobs:
           fi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: release/
@@ -86,12 +85,14 @@ jobs:
     name: Create Release
     needs: build-and-release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: release
 
@@ -101,12 +102,9 @@ jobs:
           find release -type f -exec cp {} assets/ \;
 
       - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ./assets/*
           draft: false
           prerelease: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          generate_release_notes: true 
