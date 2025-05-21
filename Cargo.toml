@@ -1,14 +1,38 @@
 [package]
 name = "mcdp-tool"
-version = "0.3.0"
+version = "0.1.0"
 edition = "2021"
 authors = ["Your Name <your.email@example.com>"]
 description = "CLI tool with self-update capability"
-repository = "https://github.com/zupermind/mcdp-binaries"
+readme = "README.md"
+repository = "https://github.com/your-org/mcdp-binaries"
 
-[dependencies]
-clap = { version = "4.3.0", features = ["derive"] }
-self_update = { version = "0.42", features = ["archive-tar", "compression-flate2", "rustls"] }
-anyhow = "1.0"
-log = "0.4"
-env_logger = "0.11"
+[dependencies.anyhow]
+version = "1.0"
+default-features = false
+
+[dependencies.clap]
+version = "4.3.0"
+features = ["derive", "help",  "std",  "color", "usage", "error-context", "suggestions"]
+
+default-features = false
+
+[dependencies.env_logger]
+version = "0.11"
+default-features = false
+
+[dependencies.log]
+version = "0.4"
+default-features = false
+
+[dependencies.self_update]
+version = "0.38"
+features = ["archive-tar", "compression-flate2", "rustls"]
+default-features = false
+
+
+[[bin]]
+path = "src/main.rs"
+name = "mcdp-tool"
+edition = "2021"
+required-features = []
