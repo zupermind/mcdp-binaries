@@ -66,7 +66,7 @@ fn update_binary(check_only: bool) -> Result<()> {
         "aarch64-unknown-linux-gnu" => "linux-arm64",
         _ => target.as_str(), // fallback to the original target
     };
-    
+    //
     let current_version = cargo_crate_version!();
     println!("Checking current version... v{}", current_version);
     println!("Checking latest released version... ");
