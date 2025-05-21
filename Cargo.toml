@@ -13,8 +13,8 @@ default-features = false
 
 [dependencies.clap]
 version = "4.5"
-features = ["derive", "help",  "std",  "color", "usage", "error-context", "suggestions"]
-
+features = ["derive", "help", "std", "color", "usage", "error-context", "suggestions"]
+default-features = false
 
 [dependencies.env_logger]
 version = "0.11"
@@ -27,7 +27,8 @@ default-features = false
 [dependencies.self_update]
 version = "0.38"
 features = ["archive-tar", "compression-flate2", "rustls"]
-
+default-features = false
+ 
 
 [[bin]]
 path = "src/main.rs"
