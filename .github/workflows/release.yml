@@ -82,10 +82,12 @@ jobs:
         shell: bash
         run: |
           cd release
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            sha256sum ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
-          else
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
             sha256sum ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            shasum -a 256 ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
+            certutil -hashfile ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe SHA256 | findstr /v "hash" > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
           fi
 
       - name: Upload artifacts
