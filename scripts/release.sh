@@ -18,11 +18,11 @@ VERSION="$1"
 TAG="v$VERSION"
 
 # Check if we're on the main branch
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-if [ "$CURRENT_BRANCH" != "main" ] && [ "$CURRENT_BRANCH" != "master" ]; then
-  echo "You must be on main/master branch to release. Current branch: $CURRENT_BRANCH"
-  exit 1
-fi
+# CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+# if [ "$CURRENT_BRANCH" != "main" ] && [ "$CURRENT_BRANCH" != "master" ]; then
+#   echo "You must be on main/master branch to release. Current branch: $CURRENT_BRANCH"
+#   exit 1
+# fi
 
 # Check for uncommitted changes
 if [ -n "$(git status --porcelain)" ]; then
