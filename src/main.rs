@@ -59,36 +59,35 @@ fn update_binary(check_only: bool) -> Result<()> {
     println!("Checking target-arch... {}", target);
     
     // Map Rust target triple to our asset naming convention
-    let asset_target = match target.as_str() {
+    let asset_target = match target  {
         "x86_64-apple-darwin" => "macos-amd64",
         "aarch64-apple-darwin" => "macos-arm64",
         "x86_64-unknown-linux-gnu" => "linux-amd64",
         "aarch64-unknown-linux-gnu" => "linux-arm64",
         "x86_64-pc-windows-msvc" => "windows-amd64",
         "aarch64-pc-windows-msvc" => "windows-arm64",
-        _ => target.as_str(), // fallback to the original target
+        _ => target, // fallback to the original target
     };
     //
     let current_version = cargo_crate_version!();
     println!("Checking current version... v{}", current_version);
     println!("Checking latest released version... ");
     
+    let binary_name =  if asset_target.starts_with("windows") {
+        format!("{}.exe", BINARY_NAME)
+    } else {
+        BINARY_NAME.to_string()
+    };
+    
     let status = self_update::backends::github::Update::configure()
         .repo_owner(REPO_OWNER)
         .repo_name(REPO_NAME)
-        .bin_name(BINARY_NAME)
+        .bin_name(&binary_name)
         .target(asset_target) // Use our mapped asset target
         .show_download_progress(true)
         .current_version(current_version)
         .build()
         .context("Failed to build updater")?;
-        
-    // For Windows targets, specify the .exe extension
-    let status = if asset_target.starts_with("windows") {
-        status.binary_name(&format!("{}.exe", BINARY_NAME))
-    } else {
-        status
-    };
 
     if check_only {
         match status.get_latest_release() {
