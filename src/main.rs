@@ -64,6 +64,8 @@ fn update_binary(check_only: bool) -> Result<()> {
         "aarch64-apple-darwin" => "macos-arm64",
         "x86_64-unknown-linux-gnu" => "linux-amd64",
         "aarch64-unknown-linux-gnu" => "linux-arm64",
+        "x86_64-pc-windows-msvc" => "windows-amd64",
+        "aarch64-pc-windows-msvc" => "windows-arm64",
         _ => target.as_str(), // fallback to the original target
     };
     //
@@ -80,6 +82,13 @@ fn update_binary(check_only: bool) -> Result<()> {
         .current_version(current_version)
         .build()
         .context("Failed to build updater")?;
+        
+    // For Windows targets, specify the .exe extension
+    let status = if asset_target.starts_with("windows") {
+        status.binary_name(&format!("{}.exe", BINARY_NAME))
+    } else {
+        status
+    };
 
     if check_only {
         match status.get_latest_release() {

@@ -31,6 +31,14 @@ jobs:
             target: aarch64-apple-darwin
             platform: macos
             arch: arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            platform: windows
+            arch: amd64
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            platform: windows
+            arch: arm64
 
     steps:
       - name: Checkout code
@@ -61,6 +69,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
+      - name: Setup Windows ARM64 cross-compilation
+        if: matrix.target == 'aarch64-pc-windows-msvc'
+        run: |
+          rustup target add aarch64-pc-windows-msvc
+
       - name: Configure Cargo for cross-compilation (Linux ARM only)
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: |
@@ -87,7 +100,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
             cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}.exe release/${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe
           else
             cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }} release/${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}
@@ -98,9 +111,17 @@ jobs:
         run: |
           cd release
           if [[ "${{ runner.os }}" == "Linux" ]]; then
-            sha256sum ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
+            if [[ "${{ matrix.platform }}" == "windows" ]]; then
+              sha256sum ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
+            else
+              sha256sum ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
+            fi
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            shasum -a 256 ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
+            if [[ "${{ matrix.platform }}" == "windows" ]]; then
+              shasum -a 256 ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
+            else
+              shasum -a 256 ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
+            fi
           elif [[ "${{ runner.os }}" == "Windows" ]]; then
             certutil -hashfile ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe SHA256 | findstr /v "hash" > ${{ env.BINARY_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
           fi
