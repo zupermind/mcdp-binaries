@@ -7,29 +7,15 @@ description = "CLI tool with self-update capability"
 readme = "README.md"
 repository = "https://github.com/zupermind/mcdp-binaries"
 
-[dependencies.anyhow]
-version = "1"
-default-features = false
+[dependencies]
+anyhow = "1"
+clap = { version = "4.5", features = ["derive", "help", "std", "color", "usage", "error-context", "suggestions"], default-features = false }
+env_logger = { version = "0.11", default-features = false }
+log = { version = "0.4", default-features = false }
+self_update = { version = "0.38", features = ["archive-tar", "compression-flate2", "rustls"], default-features = false }
 
-[dependencies.clap]
-version = "4.5"
-features = ["derive", "help", "std", "color", "usage", "error-context", "suggestions"]
-default-features = false
-
-[dependencies.env_logger]
-version = "0.11"
-default-features = false
-
-[dependencies.log]
-version = "0.4"
-default-features = false
-
-[dependencies.self_update]
-version = "0.38"
-features = ["archive-tar", "compression-flate2", "rustls"]
-default-features = false
-
-
+zuper-rs-cbor-utils = { version = "7", registry = "zuper-registry", path = "../zuper-rs-cbor-utils" }
+ 
 [[bin]]
 path = "src/main.rs"
 name = "mcdp-tool"
