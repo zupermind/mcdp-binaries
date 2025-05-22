@@ -14,8 +14,8 @@ env_logger = { version = "0.11", default-features = false }
 log = { version = "0.4", default-features = false }
 self_update = { version = "0.38", features = ["archive-tar", "compression-flate2", "rustls"], default-features = false }
 
-zuper-rs-cbor-utils = { version = "7", registry = "zuper-registry" }
- 
+#zuper-rs-cbor-utils = { version = "7", registry = "zuper-registry" }
+zuper-rs-mcdp-cli = { version = "7", registry = "zuper-registry"}
 [[bin]]
 path = "src/main.rs"
 name = "mcdp-tool"

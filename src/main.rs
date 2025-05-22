@@ -34,7 +34,12 @@ enum Commands {
 }
 
 fn main() -> Result<()> {
+    
+    
+    
     env_logger::init();
+
+    let a = zuper_rs_mcdp_cli::main_go();
     
     let cli = Cli::parse();
 
