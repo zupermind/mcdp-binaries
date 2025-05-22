@@ -63,6 +63,11 @@ openssl = { version = "0.10", features = ["vendored"] }
 version = "*"
 features = ["bundled"]
 
+# SQLite configuration for macOS static linking
+[target.'cfg(target_os = "macos")'.dependencies.rusqlite]
+version = "*"
+features = ["bundled"]
+
 # Additional static linking configurations for musl
 [target.'cfg(target_env = "musl")'.dependencies.ring]
 version = "*"
