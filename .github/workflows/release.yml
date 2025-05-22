@@ -71,6 +71,8 @@ jobs:
           cat > .cargo/config.toml << EOF
           [registries.zuper-registry]
           index = "${CARGO_REGISTRY_URL}"
+          [registry]
+          global-credential-providers = ["cargo:token"]
           EOF
             
 
