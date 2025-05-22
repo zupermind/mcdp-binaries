@@ -9,6 +9,9 @@ repository = "https://github.com/zupermind/mcdp-binaries"
 build = "build.rs"
 
 [build-dependencies]
+
+[dependencies]
+wit-bindgen-cli = "0.42.1"
 # These dependencies are used by the build script only
 
 [dependencies.anyhow]
