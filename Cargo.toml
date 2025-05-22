@@ -58,15 +58,8 @@ openssl = { version = "0.10", features = ["vendored"] }
 [target.'cfg(target_os = "macos")'.dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
 
-# SQLite configuration for static linking
-[target.'cfg(target_env = "musl")'.dependencies.rusqlite]
-version = "*"
-features = ["bundled"]
-
-# SQLite configuration for macOS static linking
-[target.'cfg(target_os = "macos")'.dependencies.rusqlite]
-version = "*"
-features = ["bundled"]
+# SQLite configuration for static linking - removed rusqlite to avoid conflicts
+# The bundled SQLite will be provided through libsqlite3-sys instead
 
 # SQLx configuration for static linking on all targets
 [target.'cfg(any(target_env = "musl", target_os = "macos"))'.dependencies.sqlx]
@@ -80,14 +73,13 @@ version = "*"
 features = []
 
 # libsqlite3-sys configuration for bundled SQLite
-[target.'cfg(any(target_env = "musl", target_os = "macos"))'.dependencies.libsqlite3-sys]
-version = "*"
-features = ["bundled"]
-
-# Explicit configuration for musl targets only
 [target.'cfg(target_env = "musl")'.dependencies.libsqlite3-sys]
 version = "*"
 features = ["bundled", "buildtime_bindgen"]
+
+[target.'cfg(target_os = "macos")'.dependencies.libsqlite3-sys]
+version = "*"
+features = ["bundled"]
 
 # Define features
 [features]
