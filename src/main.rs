@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use log::{error, info};
 use self_update::cargo_crate_version;
+use zuper_rs_mcdp_cli::main_proc::main_go;
 
 // Global constants
 const REPO_OWNER: &str = "zupermind";
@@ -33,13 +34,19 @@ enum Commands {
     },
 }
 
-fn main() -> Result<()> {
-    
-    
-    
+
+#[tokio::main]
+async fn main() -> Result<()> {
+
+    //
+    // // only check if there is exactly one argument that is update
+    // if args.len() == 2 && args[1] == "update" {
+    //     update_binary(false)?;
+    //     return Ok(());
+    // }
     env_logger::init();
 
-    let a = zuper_rs_mcdp_cli::main_go();
+    let a = zuper_rs_mcdp_cli::main_proc::main_go();
     
     let cli = Cli::parse();
 
@@ -77,13 +84,13 @@ fn update_binary(check_only: bool) -> Result<()> {
     let current_version = cargo_crate_version!();
     println!("Checking current version... v{}", current_version);
     println!("Checking latest released version... ");
-    
+
     let binary_name =  if asset_target.starts_with("windows") {
         format!("{}.exe", BINARY_NAME)
     } else {
         BINARY_NAME.to_string()
     };
-    
+
     let status = self_update::backends::github::Update::configure()
         .repo_owner(REPO_OWNER)
         .repo_name(REPO_NAME)
