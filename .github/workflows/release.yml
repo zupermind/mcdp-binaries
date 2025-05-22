@@ -16,11 +16,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
+            target: x86_64-unknown-linux-musl
             platform: linux
             arch: amd64
           - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
+            target: aarch64-unknown-linux-musl
             platform: linux
             arch: arm64
           - os: macos-latest
@@ -90,15 +90,17 @@ jobs:
           cat "$CARGO_HOME/credentials.toml"
           
           # cargo +nightly -Z unstable-options config get
-      -   name: Set Cargo registry token for Windows
-          if: runner.os == 'Windows'
-          run: |
-            echo "CARGO_REGISTRIES_ZUPER_REGISTRY_TOKEN=${{ secrets.CARGO_REGISTRY_TOKEN }}" >> $GITHUB_ENV
+      
+      - name: Set Cargo registry token for Windows
+        if: runner.os == 'Windows'
+        run: |
+          echo "CARGO_REGISTRIES_ZUPER_REGISTRY_TOKEN=${{ secrets.CARGO_REGISTRY_TOKEN }}" >> $GITHUB_ENV
+      
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y pkg-config libssl-dev
+          sudo apt-get install -y pkg-config musl-tools musl-dev
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
@@ -109,7 +111,7 @@ jobs:
           echo "OPENSSL_LIB_DIR=$(brew --prefix openssl@3)/lib" >> $GITHUB_ENV
 
       - name: Install cross-compilation tools (Linux ARM only)
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        if: matrix.target == 'aarch64-unknown-linux-musl'
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
@@ -121,17 +123,17 @@ jobs:
           
 
       - name: Configure Cargo for cross-compilation (Linux ARM only)
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        if: matrix.target == 'aarch64-unknown-linux-musl'
         run: | 
           # Append cross-compilation configuration to existing config file
           cat >> $CARGO_HOME/config.toml << EOF
           
-          [target.aarch64-unknown-linux-gnu]
+          [target.aarch64-unknown-linux-musl]
           linker = "aarch64-linux-gnu-gcc"
           EOF
-          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-          echo "CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-          echo "CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++" >> $GITHUB_ENV
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+          echo "CC_aarch64_unknown_linux_musl=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+          echo "CXX_aarch64_unknown_linux_musl=aarch64-linux-gnu-g++" >> $GITHUB_ENV
           # Add PyO3 cross-compilation environment variables
           echo "PYO3_CROSS=1" >> $GITHUB_ENV
           echo "PYO3_CROSS_PYTHON_VERSION=3.10" >> $GITHUB_ENV
@@ -142,8 +144,10 @@ jobs:
         run: |
           cargo install wit-bindgen-cli
       - name: Build
+        env:
+          RUSTFLAGS: ${{ (contains(matrix.target, 'musl') && '-C target-feature=+crt-static') || (contains(matrix.target, 'apple') && '-C link-args=-static-libgcc') || '' }}
         run: |
-          if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
+          if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-musl" ]]; then
             cargo build --no-default-features --features python-abi3 --release --target ${{ matrix.target }}
           else
             cargo build --no-default-features --release --target ${{ matrix.target }}
