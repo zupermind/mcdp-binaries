@@ -138,9 +138,9 @@ jobs:
 
       - name: Add Rust target
         run: rustup target add ${{ matrix.target }}
-      - name: Install wit-bindgen
+      - name: Install wit-bindgen-cli
         run: |
-          cargo install wit-bindgen
+          cargo install wit-bindgen-cli
       - name: Build
         run: |
           if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
