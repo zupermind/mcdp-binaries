@@ -73,7 +73,13 @@ jobs:
           [registry]
           global-credential-providers = ["cargo:token"]
           EOF
-            
+          
+          echo "config.toml:"
+          cat .cargo/config.toml
+          echo "credentials.toml:"
+          cat .cargo/credentials.toml
+          
+          # cargo +nightly -Z unstable-options config get
 
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
