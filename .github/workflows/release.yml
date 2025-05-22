@@ -137,6 +137,15 @@ jobs:
           # Add PyO3 cross-compilation environment variables
           echo "PYO3_CROSS=1" >> $GITHUB_ENV
           echo "PYO3_CROSS_PYTHON_VERSION=3.10" >> $GITHUB_ENV
+          # Add SQLite configuration for musl
+          echo "SQLITE3_STATIC=1" >> $GITHUB_ENV
+          echo "SQLITE3_LIB_DIR=" >> $GITHUB_ENV
+
+      - name: Configure SQLite for musl targets
+        if: contains(matrix.target, 'musl')
+        run: |
+          echo "SQLITE3_STATIC=1" >> $GITHUB_ENV
+          echo "LIBSQLITE3_FLAGS=-DSQLITE_MAX_EXPR_DEPTH=0" >> $GITHUB_ENV
 
       - name: Add Rust target
         run: rustup target add ${{ matrix.target }}
@@ -146,6 +155,8 @@ jobs:
       - name: Build
         env:
           RUSTFLAGS: ${{ (contains(matrix.target, 'musl') && '-C target-feature=+crt-static') || (contains(matrix.target, 'apple') && '-C link-args=-static-libgcc') || '' }}
+          LIBSQLITE3_SYS_USE_PKG_CONFIG: ${{ contains(matrix.target, 'musl') && '0' || '' }}
+          SQLITE3_STATIC: ${{ contains(matrix.target, 'musl') && '1' || '' }}
         run: |
           if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-musl" ]]; then
             cargo build --no-default-features --features python-abi3 --release --target ${{ matrix.target }}
