@@ -63,6 +63,11 @@ openssl = { version = "0.10", features = ["vendored"] }
 version = "*"
 features = ["bundled"]
 
+# Additional static linking configurations for musl
+[target.'cfg(target_env = "musl")'.dependencies.ring]
+version = "*"
+features = []
+
 # Define features
 [features]
 default = []

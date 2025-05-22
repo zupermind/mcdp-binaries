@@ -101,6 +101,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pkg-config musl-tools musl-dev
+          # Create musl-gcc wrapper for x86_64
+          sudo ln -sf /usr/bin/musl-gcc /usr/local/bin/musl-gcc
+          sudo ln -sf /usr/bin/musl-g++ /usr/local/bin/musl-g++ || echo "musl-g++ not available"
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
@@ -134,12 +137,26 @@ jobs:
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
           echo "CC_aarch64_unknown_linux_musl=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
           echo "CXX_aarch64_unknown_linux_musl=aarch64-linux-gnu-g++" >> $GITHUB_ENV
+          echo "AR_aarch64_unknown_linux_musl=aarch64-linux-gnu-ar" >> $GITHUB_ENV
+          echo "STRIP_aarch64_unknown_linux_musl=aarch64-linux-gnu-strip" >> $GITHUB_ENV
           # Add PyO3 cross-compilation environment variables
           echo "PYO3_CROSS=1" >> $GITHUB_ENV
           echo "PYO3_CROSS_PYTHON_VERSION=3.10" >> $GITHUB_ENV
           # Add SQLite configuration for musl
           echo "SQLITE3_STATIC=1" >> $GITHUB_ENV
           echo "SQLITE3_LIB_DIR=" >> $GITHUB_ENV
+
+      - name: Configure cross-compilation for x86_64 musl
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: |
+          # Configure for x86_64 musl target
+          cat >> $CARGO_HOME/config.toml << EOF
+          
+          [target.x86_64-unknown-linux-musl]
+          linker = "musl-gcc"
+          EOF
+          echo "CC_x86_64_unknown_linux_musl=musl-gcc" >> $GITHUB_ENV
+          echo "CXX_x86_64_unknown_linux_musl=musl-g++" >> $GITHUB_ENV
 
       - name: Configure SQLite for musl targets
         if: contains(matrix.target, 'musl')
