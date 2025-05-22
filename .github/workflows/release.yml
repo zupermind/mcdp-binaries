@@ -157,6 +157,9 @@ jobs:
           # Disable fortified functions that cause glibc issues
           echo "CFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
           echo "CXXFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
+          # Set TARGET and HOST environment variables for cross-compilation
+          echo "TARGET=aarch64-unknown-linux-musl" >> $GITHUB_ENV
+          echo "HOST=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
 
       - name: Configure cross-compilation for x86_64 musl
         if: matrix.target == 'x86_64-unknown-linux-musl'
@@ -175,6 +178,7 @@ jobs:
           # Disable fortified functions 
           echo "CFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
           echo "CXXFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
+
 
       - name: Configure SQLite for musl targets
         if: contains(matrix.target, 'musl')
@@ -200,6 +204,8 @@ jobs:
 
       - name: Add Rust target
         run: rustup target add ${{ matrix.target }}
+        
+
       - name: Install wit-bindgen-cli
         run: |
           cargo install wit-bindgen-cli
