@@ -28,8 +28,8 @@ fn main() {
 }
 
 fn get_git_version() -> Option<String> {
-    // Try to get version from MCDP_VERSION environment variable first
-    if let Ok(version) = env::var("MCDP_VERSION") {
+    // Try to get version from VERSION environment variable first
+    if let Ok(version) = env::var("VERSION") {
         if !version.is_empty() {
             return Some(version);
         }
@@ -44,7 +44,15 @@ fn get_git_version() -> Option<String> {
     if output.status.success() {
         String::from_utf8(output.stdout)
             .ok()
-            .map(|s| s.trim().to_string())
+            .map(|s| {
+                let version = s.trim();
+                // Remove leading 'v' if present to ensure consistent format
+                if version.starts_with('v') {
+                    version[1..].to_string()
+                } else {
+                    version.to_string()
+                }
+            })
     } else {
         None
     }

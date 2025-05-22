@@ -1,9 +1,7 @@
 use anyhow::{Context, Result};
 use log::{error, info};
-use self_update::cargo_crate_version;
 use zuper_rs_mcdp_cli::main_proc::main_go;
 use std::env;
-use std::process::Command;
 
 // Include the generated version file
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
@@ -13,8 +11,7 @@ const REPO_OWNER: &str = "zupermind";
 const REPO_NAME: &str = "mcdp-binaries";
 const BINARY_NAME: &str = "mcdp-tool";
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     env_logger::init();
     
     let args: Vec<String> = env::args().collect();
@@ -27,7 +24,13 @@ async fn main() -> Result<()> {
     
     // Otherwise, run the main application
     println!("Current version: {}", VERSION);
-    main_go().await
+    
+    // Run the async application in the tokio runtime
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .context("Failed to create tokio runtime")?
+        .block_on(main_go())
 }
 
 fn update_binary(check_only: bool) -> Result<()> {
