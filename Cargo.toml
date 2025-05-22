@@ -6,11 +6,16 @@ authors = ["Andrea Censi <your.email@example.com>"]
 description = "CLI tool with self-update capability"
 readme = "README.md"
 repository = "https://github.com/zupermind/mcdp-binaries"
+build = "build.rs"
+
+[build-dependencies]
+# These dependencies are used by the build script only
 
 [dependencies.anyhow]
 version = "1"
 default-features = false
 features = ["std"]
+
 [dependencies.clap]
 version = "4.5"
 features = ["derive", "help", "std", "color", "usage", "error-context", "suggestions"]
@@ -38,6 +43,17 @@ default-features = false
 version = "7"
 registry = "zuper-registry"
 default-features = false
+
+# Add optional PyO3 dependency for cross-compilation
+[dependencies.pyo3]
+version = "0.23"
+optional = true
+features = ["abi3-py310"]
+
+# Define features
+[features]
+default = []
+python-abi3 = ["pyo3"]
 
 [[bin]]
 path = "src/main.rs"

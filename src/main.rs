@@ -1,69 +1,33 @@
 use anyhow::{Context, Result};
-use clap::{Parser, Subcommand};
 use log::{error, info};
 use self_update::cargo_crate_version;
 use zuper_rs_mcdp_cli::main_proc::main_go;
+use std::env;
+use std::process::Command;
+
+// Include the generated version file
+include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
 // Global constants
 const REPO_OWNER: &str = "zupermind";
 const REPO_NAME: &str = "mcdp-binaries";
 const BINARY_NAME: &str = "mcdp-tool";
 
-#[derive(Parser)]
-#[command(name = BINARY_NAME)]
-#[command(author, version, about, long_about = None)]
-struct Cli {
-    #[command(subcommand)]
-    command: Option<Commands>,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    /// Update the tool to the latest version
-    Update {
-        /// Check if an update is available without installing it
-        #[arg(short, long)]
-        check_only: bool,
-    },
-    
-    /// Example command
-    Example {
-        /// An example parameter
-        #[arg(short, long)]
-        param: Option<String>,
-    },
-}
-
-
 #[tokio::main]
 async fn main() -> Result<()> {
-
-    //
-    // // only check if there is exactly one argument that is update
-    // if args.len() == 2 && args[1] == "update" {
-    //     update_binary(false)?;
-    //     return Ok(());
-    // }
     env_logger::init();
-
-    let a = zuper_rs_mcdp_cli::main_proc::main_go();
     
-    let cli = Cli::parse();
-
-    match &cli.command {
-        Some(Commands::Update { check_only }) => {
-            update_binary(*check_only)?;
-        }
-        Some(Commands::Example { param }) => {
-            println!("Running example command with param: {:?}", param);
-        }
-        None => {
-            println!("Running default action...");
-            println!("Current version: {}", cargo_crate_version!());
-        }
+    let args: Vec<String> = env::args().collect();
+    
+    // Check if there is exactly one argument and it is "update"
+    if args.len() == 2 && args[1] == "update" {
+        update_binary(false)?;
+        return Ok(());
     }
-
-    Ok(())
+    
+    // Otherwise, run the main application
+    println!("Current version: {}", VERSION);
+    main_go().await
 }
 
 fn update_binary(check_only: bool) -> Result<()> {
@@ -80,12 +44,11 @@ fn update_binary(check_only: bool) -> Result<()> {
         "aarch64-pc-windows-msvc" => "windows-arm64",
         _ => target, // fallback to the original target
     };
-    //
-    let current_version = cargo_crate_version!();
-    println!("Checking current version... v{}", current_version);
+    
+    println!("Checking current version... {}", VERSION);
     println!("Checking latest released version... ");
 
-    let binary_name =  if asset_target.starts_with("windows") {
+    let binary_name = if asset_target.starts_with("windows") {
         format!("{}.exe", BINARY_NAME)
     } else {
         BINARY_NAME.to_string()
@@ -97,15 +60,15 @@ fn update_binary(check_only: bool) -> Result<()> {
         .bin_name(&binary_name)
         .target(asset_target) // Use our mapped asset target
         .show_download_progress(true)
-        .current_version(current_version)
+        .current_version(VERSION)
         .build()
         .context("Failed to build updater")?;
 
     if check_only {
         match status.get_latest_release() {
             Ok(release) => {
-                if current_version == release.version {
-                    println!("Already up to date at version {}", current_version);
+                if VERSION == release.version {
+                    println!("Already up to date at version {}", VERSION);
                 } else {
                     println!("Update available: {}", release.version);
                 }
@@ -121,7 +84,7 @@ fn update_binary(check_only: bool) -> Result<()> {
                 info!("Updated successfully to {}", update_result.version());
                 println!("Updated successfully to {}", update_result.version());
             } else {
-                println!("Already up to date at version {}", current_version);
+                println!("Already up to date at version {}", VERSION);
             }
         }
         Err(e) => {
