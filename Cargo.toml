@@ -84,6 +84,11 @@ features = []
 version = "*"
 features = ["bundled"]
 
+# Explicit configuration for musl targets only
+[target.'cfg(target_env = "musl")'.dependencies.libsqlite3-sys]
+version = "*"
+features = ["bundled", "buildtime_bindgen"]
+
 # Define features
 [features]
 default = []
