@@ -13,6 +13,7 @@ jobs:
     name: Build and Release
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false 
       matrix:
         include:
           - os: ubuntu-latest
@@ -169,6 +170,8 @@ jobs:
         run: |
           echo "SQLITE3_STATIC=1" >> $GITHUB_ENV
           echo "LIBSQLITE3_SYS_USE_PKG_CONFIG=0" >> $GITHUB_ENV
+          echo "SQLX_OFFLINE=true" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=11.0" >> $GITHUB_ENV
 
       - name: Add Rust target
         run: rustup target add ${{ matrix.target }}
@@ -180,6 +183,8 @@ jobs:
           RUSTFLAGS: ${{ (contains(matrix.target, 'musl') && '-C target-feature=+crt-static') || (contains(matrix.target, 'apple') && '-C link-args=-static-libgcc') || '' }}
           LIBSQLITE3_SYS_USE_PKG_CONFIG: ${{ (contains(matrix.target, 'musl') || contains(matrix.target, 'apple')) && '0' || '' }}
           SQLITE3_STATIC: ${{ (contains(matrix.target, 'musl') || contains(matrix.target, 'apple')) && '1' || '' }}
+          SQLX_OFFLINE: ${{ (contains(matrix.target, 'musl') || contains(matrix.target, 'apple')) && 'true' || '' }}
+          SQLITE3_LIB_FLAGS: ${{ contains(matrix.target, 'apple') && '-DSQLITE_OMIT_LOAD_EXTENSION' || '' }}
         run: |
           if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-musl" ]]; then
             cargo build --no-default-features --features python-abi3 --release --target ${{ matrix.target }}

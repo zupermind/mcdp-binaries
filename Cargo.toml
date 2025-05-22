@@ -68,10 +68,21 @@ features = ["bundled"]
 version = "*"
 features = ["bundled"]
 
+# SQLx configuration for static linking on all targets
+[target.'cfg(any(target_env = "musl", target_os = "macos"))'.dependencies.sqlx]
+version = "*"
+features = ["runtime-tokio-rustls", "sqlite"]
+default-features = false
+
 # Additional static linking configurations for musl
 [target.'cfg(target_env = "musl")'.dependencies.ring]
 version = "*"
 features = []
+
+# libsqlite3-sys configuration for bundled SQLite
+[target.'cfg(any(target_env = "musl", target_os = "macos"))'.dependencies.libsqlite3-sys]
+version = "*"
+features = ["bundled"]
 
 # Define features
 [features]
