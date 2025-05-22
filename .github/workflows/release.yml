@@ -60,15 +60,16 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
           CARGO_REGISTRY_URL: ${{ secrets.CARGO_REGISTRY_URL }}
         run: |
+          echo "CARGO_HOME: $CARGO_HOME"
           
           # Create credentials file with token
-          cat > .cargo/credentials.toml << EOF
+          cat > $CARGO_HOME/credentials.toml << EOF
           [registries.zuper-registry]
           token = "${CARGO_REGISTRY_TOKEN}"
           EOF
-          chmod 600 .cargo/credentials.toml
+          chmod 600 $CARGO_HOME/credentials.toml
           # Create config file with registry URL
-          cat > .cargo/config.toml << EOF
+          cat > $CARGO_HOME/config.toml << EOF
           [registries.zuper-registry]
           index = "${CARGO_REGISTRY_URL}"
           [registry]
@@ -76,13 +77,11 @@ jobs:
           EOF
           
           echo "config.toml:"
-          cat .cargo/config.toml
+          cat $CARGO_HOME/config.toml
           echo "credentials.toml:"
-          cat .cargo/credentials.toml
+          cat $CARGO_HOME/credentials.toml
           
           # cargo +nightly -Z unstable-options config get
-          echo "CARGO_HOME: $CARGO_HOME"
-          cargo login --registry zuper-registry
 
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
@@ -111,9 +110,10 @@ jobs:
 
       - name: Configure Cargo for cross-compilation (Linux ARM only)
         if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          mkdir -p .cargo
-          cat > .cargo/config.toml << EOF
+        run: | 
+          # Append cross-compilation configuration to existing config file
+          cat >> $CARGO_HOME/config.toml << EOF
+          
           [target.aarch64-unknown-linux-gnu]
           linker = "aarch64-linux-gnu-gcc"
           EOF
