@@ -18,11 +18,11 @@ jobs:
         include:
           - os: ubuntu-24.04
             target: x86_64-unknown-linux-gnu
-            platform: linux
+            platform: ubuntu24
             arch: amd64 
           - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
-            platform: linux
+            platform: ubuntu24
             arch: arm64
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
@@ -32,13 +32,13 @@ jobs:
             target: aarch64-unknown-linux-gnu
             platform: ubuntu22
             arch: arm64
-          - os: macos-latest
+          - os: macos-15
             target: x86_64-apple-darwin
-            platform: macos
+            platform: macos15
             arch: amd64
-          - os: macos-latest
+          - os: macos-15
             target: aarch64-apple-darwin
-            platform: macos
+            platform: macos15
             arch: arm64
           # - os: windows-latest
           #   target: x86_64-pc-windows-msvc
@@ -161,6 +161,26 @@ jobs:
             cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }} release/${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
           fi
 
+      - name: Generate SHA256 checksum files
+        shell: bash
+        run: |
+          cd release
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            if [[ "${{ matrix.platform }}" == "windows" ]]; then
+              sha256sum ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
+            else
+              sha256sum ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
+            fi
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            if [[ "${{ matrix.platform }}" == "windows" ]]; then
+              shasum -a 256 ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
+            else
+              shasum -a 256 ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
+            fi
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
+            certutil -hashfile ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe SHA256 | findstr /v "hash" > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
+          fi
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -196,7 +216,7 @@ jobs:
           echo "" >> ../checksums.md
           echo "\`\`\`" >> ../checksums.md
           for file in *; do
-            if [[ -f "$file" ]]; then
+            if [[ -f "$file" && ! "$file" =~ \.sha256$ ]]; then
               sha256sum "$file" >> ../checksums.md
             fi
           done
