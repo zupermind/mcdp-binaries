@@ -16,11 +16,11 @@ fn main() -> Result<()> {
     // Otherwise, run the main application
     eprintln!("{} {} ({})", BINARY_NAME, VERSION, ASSET_TARGET.unwrap_or("unknown"));
     
-    
+
     let args: Vec<String> = env::args().collect();
     
     // Check if there is exactly one argument and it is "update"
-    if args.len() == 2 && args[1] == "update" {
+    if args.len() >= 2 && args[1] == "update" {
         update_binary(false)?;
         return Ok(());
     }
@@ -44,10 +44,10 @@ fn update_binary(check_only: bool) -> Result<()> {
         None => {
             // Fallback mapping for development builds without MCDP_ASSET_TARGET
             match target {
-                "x86_64-apple-darwin" => "macos-amd64",
-                "aarch64-apple-darwin" => "macos-arm64",
-                "x86_64-unknown-linux-gnu" => "linux-amd64",
-                "aarch64-unknown-linux-gnu" => "linux-arm64",
+                "x86_64-apple-darwin" => "macos15-amd64",
+                "aarch64-apple-darwin" => "macos15-arm64",
+                "x86_64-unknown-linux-gnu" => "ubuntu24-amd64",
+                "aarch64-unknown-linux-gnu" => "ubuntu24-arm64",
                 "x86_64-pc-windows-msvc" => "windows-amd64",
                 "aarch64-pc-windows-msvc" => "windows-arm64",
                 _ => target, // fallback to the original target
@@ -84,7 +84,14 @@ fn update_binary(check_only: bool) -> Result<()> {
                     println!("Update available: {}", release.version);
                 }
             }
-            Err(e) => error!("Failed to get latest release: {}", e),
+            Err(e) => {
+                error!("Failed to get latest release: {}", e);
+                println!("Failed to check for updates. This could be due to:");
+                println!("  - Network connectivity issues");
+                println!("  - GitHub API rate limiting");
+                println!("  - Repository access issues");
+                return Err(anyhow::anyhow!("Failed to get latest release: {}", e));
+            }
         }
         return Ok(());
     }
@@ -100,6 +107,30 @@ fn update_binary(check_only: bool) -> Result<()> {
         }
         Err(e) => {
             error!("Failed to update binary: {}", e);
+            
+            // Provide more helpful error messages
+            let error_msg = format!("{}", e);
+            if error_msg.contains("No asset found for target") {
+                println!("Update failed: No compatible binary found for your platform.");
+                println!("Looking for target: {}", asset_target);
+                println!("Available platforms may include:");
+                println!("  - ubuntu24-amd64, ubuntu24-arm64");
+                println!("  - ubuntu22-amd64, ubuntu22-arm64"); 
+                println!("  - macos15-amd64, macos15-arm64");
+                println!("  - windows-amd64, windows-arm64");
+                println!("Please check the latest release at: https://github.com/{}/{}/releases/latest", REPO_OWNER, REPO_NAME);
+            } else if error_msg.contains("Network") || error_msg.contains("timeout") {
+                println!("Update failed: Network connectivity issue.");
+                println!("Please check your internet connection and try again.");
+            } else if error_msg.contains("Permission") {
+                println!("Update failed: Permission denied.");
+                println!("Try running with elevated permissions (sudo on Unix, Run as Administrator on Windows).");
+            } else {
+                println!("Update failed with error: {}", e);
+                println!("Please try again or download manually from:");
+                println!("https://github.com/{}/{}/releases/latest", REPO_OWNER, REPO_NAME);
+            }
+            
             return Err(anyhow::anyhow!("Failed to update binary: {}", e));
         }
     }
