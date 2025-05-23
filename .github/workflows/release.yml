@@ -16,13 +16,21 @@ jobs:
       fail-fast: false 
       matrix:
         include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
             platform: linux
             arch: amd64
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-musl
+          - os: ubuntu-24.04
+            target: aarch64-unknown-linux-gnu
             platform: linux
+            arch: arm64
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            platform: ubuntu22
+            arch: amd64
+          - os: ubuntu-22.04
+            target: aarch64-unknown-linux-gnu
+            platform: ubuntu22
             arch: arm64
           - os: macos-latest
             target: x86_64-apple-darwin
@@ -102,16 +110,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           echo "CARGO_REGISTRIES_ZUPER_REGISTRY_TOKEN=${{ secrets.CARGO_REGISTRY_TOKEN }}" >> $GITHUB_ENV
-      
-      - name: Install dependencies (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pkg-config musl-tools musl-dev
-          # Create musl-gcc wrapper for x86_64
-          sudo ln -sf /usr/bin/musl-gcc /usr/local/bin/musl-gcc
-          sudo ln -sf /usr/bin/musl-g++ /usr/local/bin/musl-g++ || echo "musl-g++ not available"
-
+       
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -120,85 +119,11 @@ jobs:
           echo "OPENSSL_INCLUDE_DIR=$(brew --prefix openssl@3)/include" >> $GITHUB_ENV
           echo "OPENSSL_LIB_DIR=$(brew --prefix openssl@3)/lib" >> $GITHUB_ENV
 
-      - name: Install cross-compilation tools (Linux ARM only)
-        if: matrix.target == 'aarch64-unknown-linux-musl'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-          # Install musl cross-compilation tools for ARM64
-          wget https://musl.cc/aarch64-linux-musl-cross.tgz
-          tar -xzf aarch64-linux-musl-cross.tgz
-          sudo mv aarch64-linux-musl-cross /opt/
-          echo "/opt/aarch64-linux-musl-cross/bin" >> $GITHUB_PATH
+    
+           
 
-      - name: Setup Windows ARM64 cross-compilation
-        if: matrix.target == 'aarch64-pc-windows-msvc'
-        run: |
-          rustup target add aarch64-pc-windows-msvc
+       
           
-
-      - name: Configure Cargo for cross-compilation (Linux ARM only)
-        if: matrix.target == 'aarch64-unknown-linux-musl'
-        run: | 
-          # Append cross-compilation configuration to existing config file
-          cat >> $CARGO_HOME/config.toml << EOF
-          
-          [target.aarch64-unknown-linux-musl]
-          linker = "aarch64-linux-musl-gcc"
-          EOF
-          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc" >> $GITHUB_ENV
-          echo "CC_aarch64_unknown_linux_musl=aarch64-linux-musl-gcc" >> $GITHUB_ENV
-          echo "CXX_aarch64_unknown_linux_musl=aarch64-linux-musl-g++" >> $GITHUB_ENV
-          echo "AR_aarch64_unknown_linux_musl=aarch64-linux-musl-ar" >> $GITHUB_ENV
-          echo "STRIP_aarch64_unknown_linux_musl=aarch64-linux-musl-strip" >> $GITHUB_ENV
-          # Set global CC for SQLite build (this is crucial)
-          echo "CC=aarch64-linux-musl-gcc" >> $GITHUB_ENV
-          echo "CXX=aarch64-linux-musl-g++" >> $GITHUB_ENV
-          # Add PyO3 cross-compilation environment variables
-          echo "PYO3_CROSS=1" >> $GITHUB_ENV
-          echo "PYO3_CROSS_PYTHON_VERSION=3.10" >> $GITHUB_ENV
-          # Force bundled SQLite for ARM64 musl cross-compilation
-          echo "LIBSQLITE3_SYS_USE_PKG_CONFIG=0" >> $GITHUB_ENV
-          echo "LIBSQLITE3_SYS_BUNDLED=1" >> $GITHUB_ENV
-          # Disable fortified functions that cause glibc issues
-          echo "CFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
-          echo "CXXFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
-          # Set TARGET and HOST environment variables for cross-compilation
-          echo "TARGET=aarch64-unknown-linux-musl" >> $GITHUB_ENV
-          echo "HOST=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
-
-      - name: Configure cross-compilation for x86_64 musl
-        if: matrix.target == 'x86_64-unknown-linux-musl'
-        run: |
-          # Configure for x86_64 musl target
-          cat >> $CARGO_HOME/config.toml << EOF
-          
-          [target.x86_64-unknown-linux-musl]
-          linker = "musl-gcc"
-          EOF
-          echo "CC_x86_64_unknown_linux_musl=musl-gcc" >> $GITHUB_ENV
-          echo "CXX_x86_64_unknown_linux_musl=musl-g++" >> $GITHUB_ENV
-          # Set global CC for SQLite build
-          echo "CC=musl-gcc" >> $GITHUB_ENV
-          echo "CXX=musl-g++" >> $GITHUB_ENV
-          # Disable fortified functions 
-          echo "CFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
-          echo "CXXFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
-
-
-      - name: Configure SQLite for musl targets
-        if: contains(matrix.target, 'musl')
-        run: |
-          echo "LIBSQLITE3_SYS_USE_PKG_CONFIG=0" >> $GITHUB_ENV
-          echo "LIBSQLITE3_SYS_BUNDLED=1" >> $GITHUB_ENV
-          echo "LIBSQLITE3_LIB_DIR=" >> $GITHUB_ENV
-          echo "LIBSQLITE3_INCLUDE_DIR=" >> $GITHUB_ENV
-          echo "SQLITE3_LIB_DIR=" >> $GITHUB_ENV
-          echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
-          # Add flags to disable problematic SQLite features and glibc-specific functions
-          echo "LIBSQLITE3_FLAGS=-DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_MAX_EXPR_DEPTH=0 -D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
-          echo "CFLAGS=-D_FORTIFY_SOURCE=0" >> $GITHUB_ENV
-
       - name: Configure SQLite for macOS targets
         if: contains(matrix.target, 'apple')
         run: |
@@ -213,15 +138,7 @@ jobs:
         run: |
           cargo install wit-bindgen-cli
       - name: Build
-        env:
-          RUSTFLAGS: ${{ (contains(matrix.target, 'musl') && '-C target-feature=+crt-static') || (contains(matrix.target, 'apple') && '-C link-args=-static-libgcc') || '' }}
-          LIBSQLITE3_SYS_USE_PKG_CONFIG: ${{ (contains(matrix.target, 'musl') || contains(matrix.target, 'apple')) && '0' || '' }}
-          LIBSQLITE3_SYS_BUNDLED: ${{ (contains(matrix.target, 'musl') || contains(matrix.target, 'apple')) && '1' || '' }}
-          SQLITE3_STATIC: ${{ (contains(matrix.target, 'musl') || contains(matrix.target, 'apple')) && '1' || '' }}
-          SQLX_OFFLINE: ${{ (contains(matrix.target, 'musl') || contains(matrix.target, 'apple')) && 'true' || '' }}
-          SQLITE3_LIB_FLAGS: ${{ contains(matrix.target, 'apple') && '-DSQLITE_OMIT_LOAD_EXTENSION' || '' }}
-          CFLAGS: ${{ contains(matrix.target, 'musl') && '-D_FORTIFY_SOURCE=0' || '' }}
-          CXXFLAGS: ${{ contains(matrix.target, 'musl') && '-D_FORTIFY_SOURCE=0' || '' }}
+       
         run: |
           if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-musl" ]]; then
             cargo build --no-default-features --features python-abi3 --release --target ${{ matrix.target }}

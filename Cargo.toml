@@ -30,17 +30,17 @@ version = "0.42"
 features = ["archive-tar", "compression-flate2", "rustls"]
 default-features = false
 
-# Alternative TLS configuration for musl targets
-[target.'cfg(target_env = "musl")'.dependencies.self_update]
-version = "0.42"
-features = ["archive-tar", "compression-flate2", "rustls"]
-default-features = false
+# # Alternative TLS configuration for musl targets
+# [target.'cfg(target_env = "musl")'.dependencies.self_update]
+# version = "0.42"
+# features = ["archive-tar", "compression-flate2", "rustls"]
+# default-features = false
 
-# Override reqwest to use native-tls for musl targets to avoid ring dependency
-[target.'cfg(target_env = "musl")'.dependencies.reqwest]
-version = "0.12"
-features = ["json", "native-tls"]
-default-features = false
+# # Override reqwest to use native-tls for musl targets to avoid ring dependency
+# [target.'cfg(target_env = "musl")'.dependencies.reqwest]
+# version = "0.12"
+# features = ["json", "native-tls"]
+# default-features = false
 
 [dependencies.tokio]
 version = "1.0"
@@ -58,39 +58,39 @@ version = "0.23"
 optional = true
 features = ["abi3-py310"]
 
-# Static linking configuration for musl targets
-[target.'cfg(target_env = "musl")'.dependencies]
-openssl = { version = "0.10", features = ["vendored"] }
+# # Static linking configuration for musl targets
+# [target.'cfg(target_env = "musl")'.dependencies]
+# openssl = { version = "0.10", features = ["vendored"] }
 
-# Static linking configuration for macOS targets
-[target.'cfg(target_os = "macos")'.dependencies]
-openssl = { version = "0.10", features = ["vendored"] }
+# # Static linking configuration for macOS targets
+# [target.'cfg(target_os = "macos")'.dependencies]
+# openssl = { version = "0.10", features = ["vendored"] }
 
 # SQLite configuration for static linking - removed rusqlite to avoid conflicts
 # The bundled SQLite will be provided through libsqlite3-sys instead
 
 # SQLx configuration for static linking on musl targets (use native-tls to avoid ring)
-[target.'cfg(target_env = "musl")'.dependencies.sqlx]
-version = "*"
-features = ["runtime-tokio-native-tls", "sqlite"]
-default-features = false
+# [target.'cfg(target_env = "musl")'.dependencies.sqlx]
+# version = "*"
+# features = ["runtime-tokio-native-tls", "sqlite"]
+# default-features = false
 
 # SQLx configuration for macOS targets (can still use rustls)
-[target.'cfg(target_os = "macos")'.dependencies.sqlx]
-version = "*"
-features = ["runtime-tokio-rustls", "sqlite"]
-default-features = false
+# [target.'cfg(target_os = "macos")'.dependencies.sqlx]
+# version = "*"
+# features = ["runtime-tokio-rustls", "sqlite"]
+# default-features = false
 
 # Additional static linking configurations for musl - ring dependency removed to use native-tls instead
 
-# libsqlite3-sys configuration for bundled SQLite
-[target.'cfg(target_env = "musl")'.dependencies.libsqlite3-sys]
-version = "*"
-features = ["bundled", "buildtime_bindgen"]
+# # libsqlite3-sys configuration for bundled SQLite
+# [target.'cfg(target_env = "musl")'.dependencies.libsqlite3-sys]
+# version = "*"
+# features = ["bundled", "buildtime_bindgen"]
 
-[target.'cfg(target_os = "macos")'.dependencies.libsqlite3-sys]
-version = "*"
-features = ["bundled"]
+# [target.'cfg(target_os = "macos")'.dependencies.libsqlite3-sys]
+# version = "*"
+# features = ["bundled"]
 
 # Define features
 [features]
