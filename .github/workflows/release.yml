@@ -119,12 +119,6 @@ jobs:
           echo "OPENSSL_INCLUDE_DIR=$(brew --prefix openssl@3)/include" >> $GITHUB_ENV
           echo "OPENSSL_LIB_DIR=$(brew --prefix openssl@3)/lib" >> $GITHUB_ENV
 
-      - name: Install cross-compilation dependencies (Linux ARM64)
-        if: runner.os == 'Linux' && matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-
       - name: Configure SQLite for macOS targets
         if: contains(matrix.target, 'apple')
         run: |
@@ -133,23 +127,24 @@ jobs:
 
       - name: Add Rust target
         run: rustup target add ${{ matrix.target }}
-        
 
       - name: Install wit-bindgen-cli
         run: |
           cargo install wit-bindgen-cli
+
       - name: Build
         env:
           MCDP_ASSET_TARGET: ${{ matrix.platform }}-${{ matrix.arch }}
         run: |
-          if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
-            export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc
-            export CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++
-            export AR_aarch64_unknown_linux_gnu=aarch64-linux-gnu-ar
-            export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
-            cargo build --no-default-features --release --target ${{ matrix.target }}
+          cargo build --no-default-features --release --target ${{ matrix.target }}
+
+      - name: Test binary version
+        shell: bash
+        run: |
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+            ./target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}.exe --version
           else
-            cargo build --no-default-features --release --target ${{ matrix.target }}
+            ./target/${{ matrix.target }}/release/${{ env.BINARY_NAME }} --version
           fi
 
       - name: Get version from tag
