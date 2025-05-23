@@ -161,26 +161,6 @@ jobs:
             cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }} release/${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
           fi
 
-      - name: Generate SHA256 checksum
-        shell: bash
-        run: |
-          cd release
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            if [[ "${{ matrix.platform }}" == "windows" ]]; then
-              sha256sum ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
-            else
-              sha256sum ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
-            fi
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            if [[ "${{ matrix.platform }}" == "windows" ]]; then
-              shasum -a 256 ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
-            else
-              shasum -a 256 ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
-            fi
-          elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            certutil -hashfile ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe SHA256 | findstr /v "hash" > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
-          fi
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -208,10 +188,26 @@ jobs:
           mkdir -p assets
           find release -type f -exec cp {} assets/ \;
 
+      - name: Generate SHA256 checksums for release description
+        id: checksums
+        run: |
+          cd assets
+          echo "## SHA256 Checksums" > ../checksums.md
+          echo "" >> ../checksums.md
+          echo "\`\`\`" >> ../checksums.md
+          for file in *; do
+            if [[ -f "$file" ]]; then
+              sha256sum "$file" >> ../checksums.md
+            fi
+          done
+          echo "\`\`\`" >> ../checksums.md
+          echo "" >> ../checksums.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: ./assets/*
           draft: false
           prerelease: false
-          generate_release_notes: true 
+          generate_release_notes: true
+          body_path: checksums.md 

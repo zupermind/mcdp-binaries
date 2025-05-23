@@ -20,4 +20,5 @@ assets/
 # Private keys/certificates (to avoid accidentally committing these)
 *.pem
 *.key
-*.p12 
+*.p12 ./mcdp
+mcdp
