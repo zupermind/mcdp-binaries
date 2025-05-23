@@ -1,9 +1,9 @@
 [package]
-name = "mcdp-tool"
+name = "mcdp-cli"
 version = "2025.1.0"
 edition = "2024"
 authors = ["Andrea Censi <andreacensi@users.noreply.github.com>"]
-description = "CLI tool with self-update capability"
+description = "MCDP CLI interface"
 readme = "README.md"
 repository = "https://github.com/zupermind/mcdp-binaries"
 build = "build.rs"
@@ -99,5 +99,5 @@ python-abi3 = ["pyo3"]
 
 [[bin]]
 path = "src/main.rs"
-name = "mcdp-tool"
+name = "mcdp-cli"
 required-features = []

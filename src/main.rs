@@ -9,7 +9,7 @@ include!(concat!(env!("OUT_DIR"), "/version.rs"));
 // Global constants
 const REPO_OWNER: &str = "zupermind";
 const REPO_NAME: &str = "mcdp-binaries";
-const BINARY_NAME: &str = "mcdp-tool";
+const BINARY_NAME: &str = "mcdp-cli";
 
 fn main() -> Result<()> {
     env_logger::init();

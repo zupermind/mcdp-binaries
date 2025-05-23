@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 env:
-  BINARY_NAME: mcdp-tool
+  BINARY_NAME: mcdp-cli
 
 jobs:
   build-and-release:

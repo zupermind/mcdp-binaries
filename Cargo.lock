@@ -2424,6 +2424,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4facc753ae494aeb6e3c22f839b158aebd4f9270f55cd3c79906c45476c47ab4"
 
 [[package]]
+name = "mcdp-cli"
+version = "2025.1.0"
+dependencies = [
+ "anyhow",
+ "env_logger",
+ "libsqlite3-sys",
+ "log",
+ "openssl",
+ "pyo3",
+ "reqwest",
+ "self_update",
+ "sqlx",
+ "tokio",
+ "zuper-rs-mcdp-cli",
+]
+
+[[package]]
 name = "mcdp-format2-rust"
 version = "2.12.2505221315"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
@@ -2440,23 +2457,6 @@ dependencies = [
  "static_assertions",
  "walkdir",
  "zuper-rs-cbor-utils",
-]
-
-[[package]]
-name = "mcdp-tool"
-version = "2025.1.0"
-dependencies = [
- "anyhow",
- "env_logger",
- "libsqlite3-sys",
- "log",
- "openssl",
- "pyo3",
- "reqwest",
- "self_update",
- "sqlx",
- "tokio",
- "zuper-rs-mcdp-cli",
 ]
 
 [[package]]
