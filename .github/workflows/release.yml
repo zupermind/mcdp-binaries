@@ -57,6 +57,12 @@ jobs:
           mkdir -p .cargo
           echo "CARGO_HOME=$(pwd)/.cargo" >> $GITHUB_ENV
 
+      - name: Set global environment variables
+        shell: bash
+        run: |
+          echo "SQLITE3_STATIC=1" >> $GITHUB_ENV
+          echo "SQLX_OFFLINE=true" >> $GITHUB_ENV
+          
       - name: Configure Cargo credentials
         shell: bash
         env:
@@ -183,7 +189,6 @@ jobs:
       - name: Configure SQLite for musl targets
         if: contains(matrix.target, 'musl')
         run: |
-          echo "SQLITE3_STATIC=1" >> $GITHUB_ENV
           echo "LIBSQLITE3_SYS_USE_PKG_CONFIG=0" >> $GITHUB_ENV
           echo "LIBSQLITE3_SYS_BUNDLED=1" >> $GITHUB_ENV
           echo "LIBSQLITE3_LIB_DIR=" >> $GITHUB_ENV
@@ -197,9 +202,7 @@ jobs:
       - name: Configure SQLite for macOS targets
         if: contains(matrix.target, 'apple')
         run: |
-          echo "SQLITE3_STATIC=1" >> $GITHUB_ENV
           echo "LIBSQLITE3_SYS_USE_PKG_CONFIG=0" >> $GITHUB_ENV
-          echo "SQLX_OFFLINE=true" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=11.0" >> $GITHUB_ENV
 
       - name: Add Rust target
