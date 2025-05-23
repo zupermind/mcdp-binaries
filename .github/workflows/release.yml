@@ -19,7 +19,7 @@ jobs:
           - os: ubuntu-24.04
             target: x86_64-unknown-linux-gnu
             platform: linux
-            arch: amd64
+            arch: amd64 
           - os: ubuntu-24.04
             target: aarch64-unknown-linux-gnu
             platform: linux
@@ -119,11 +119,12 @@ jobs:
           echo "OPENSSL_INCLUDE_DIR=$(brew --prefix openssl@3)/include" >> $GITHUB_ENV
           echo "OPENSSL_LIB_DIR=$(brew --prefix openssl@3)/lib" >> $GITHUB_ENV
 
-    
-           
+      - name: Install cross-compilation dependencies (Linux ARM64)
+        if: runner.os == 'Linux' && matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
 
-       
-          
       - name: Configure SQLite for macOS targets
         if: contains(matrix.target, 'apple')
         run: |
@@ -138,10 +139,15 @@ jobs:
         run: |
           cargo install wit-bindgen-cli
       - name: Build
-       
+        env:
+          MCDP_ASSET_TARGET: ${{ matrix.platform }}-${{ matrix.arch }}
         run: |
-          if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-musl" ]]; then
-            cargo build --no-default-features --features python-abi3 --release --target ${{ matrix.target }}
+          if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
+            export CC=aarch64-linux-gnu-gcc
+            export CXX=aarch64-linux-gnu-g++
+            export AR=aarch64-linux-gnu-ar
+            export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+            cargo build --no-default-features --release --target ${{ matrix.target }}
           else
             cargo build --no-default-features --release --target ${{ matrix.target }}
           fi

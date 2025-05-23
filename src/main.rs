@@ -37,17 +37,24 @@ fn update_binary(check_only: bool) -> Result<()> {
     let target = self_update::get_target();
     println!("Checking target-arch... {}", target);
     
-    // Map Rust target triple to our asset naming convention
-    let asset_target = match target  {
-        "x86_64-apple-darwin" => "macos-amd64",
-        "aarch64-apple-darwin" => "macos-arm64",
-        "x86_64-unknown-linux-gnu" => "linux-amd64",
-        "aarch64-unknown-linux-gnu" => "linux-arm64",
-        "x86_64-pc-windows-msvc" => "windows-amd64",
-        "aarch64-pc-windows-msvc" => "windows-arm64",
-        _ => target, // fallback to the original target
+    // Use build-time asset target if available, otherwise fall back to runtime mapping
+    let asset_target = match ASSET_TARGET {
+        Some(target) => target,
+        None => {
+            // Fallback mapping for development builds without MCDP_ASSET_TARGET
+            match target {
+                "x86_64-apple-darwin" => "macos-amd64",
+                "aarch64-apple-darwin" => "macos-arm64",
+                "x86_64-unknown-linux-gnu" => "linux-amd64",
+                "aarch64-unknown-linux-gnu" => "linux-arm64",
+                "x86_64-pc-windows-msvc" => "windows-amd64",
+                "aarch64-pc-windows-msvc" => "windows-arm64",
+                _ => target, // fallback to the original target
+            }
+        }
     };
     
+    println!("Using asset target: {}", asset_target);
     println!("Checking current version... {}", VERSION);
     println!("Checking latest released version... ");
 
@@ -61,7 +68,7 @@ fn update_binary(check_only: bool) -> Result<()> {
         .repo_owner(REPO_OWNER)
         .repo_name(REPO_NAME)
         .bin_name(&binary_name)
-        .target(asset_target) // Use our mapped asset target
+        .target(asset_target) // Use our build-time or mapped asset target
         .show_download_progress(true)
         .current_version(VERSION)
         .build()

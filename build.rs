@@ -20,11 +20,19 @@ fn main() {
         env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| "unknown".to_string())
     });
 
-    // Write the version info to a file that will be included at compile time
-    fs::write(
-        &dest_path,
-        format!("pub const VERSION: &str = \"{}\";", version)
-    ).expect("Failed to write version file");
+    // Get asset target from environment variable, with fallback to None
+    let asset_target = env::var("MCDP_ASSET_TARGET").ok();
+
+    // Write the version and asset target info to a file that will be included at compile time
+    let mut content = format!("pub const VERSION: &str = \"{}\";\n", version);
+    
+    if let Some(target) = asset_target {
+        content.push_str(&format!("pub const ASSET_TARGET: Option<&str> = Some(\"{}\");\n", target));
+    } else {
+        content.push_str("pub const ASSET_TARGET: Option<&str> = None;\n");
+    }
+
+    fs::write(&dest_path, content).expect("Failed to write version file");
 }
 
 fn get_git_version() -> Option<String> {
