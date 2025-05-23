@@ -56,7 +56,7 @@ default-features = false
 [dependencies.pyo3]
 version = "0.23"
 optional = true
-features = ["abi3-py310"]
+features = ["abi3-py312"]
 
 # # Static linking configuration for musl targets
 # [target.'cfg(target_env = "musl")'.dependencies]
