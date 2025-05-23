@@ -13,6 +13,9 @@ const BINARY_NAME: &str = "mcdp-cli";
 
 fn main() -> Result<()> {
     env_logger::init();
+    // Otherwise, run the main application
+    eprintln!("{} {} ({})", BINARY_NAME, VERSION, ASSET_TARGET.unwrap_or("unknown"));
+    
     
     let args: Vec<String> = env::args().collect();
     
@@ -22,8 +25,6 @@ fn main() -> Result<()> {
         return Ok(());
     }
     
-    // Otherwise, run the main application
-    println!("Current version: {}", VERSION);
     
     // Run the async application in the tokio runtime
     tokio::runtime::Builder::new_multi_thread()
