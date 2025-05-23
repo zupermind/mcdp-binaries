@@ -110,6 +110,19 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           echo "CARGO_REGISTRIES_ZUPER_REGISTRY_TOKEN=${{ secrets.CARGO_REGISTRY_TOKEN }}" >> $GITHUB_ENV
+          # Also create credentials file using PowerShell for better Windows compatibility
+          New-Item -Path "$env:CARGO_HOME" -ItemType Directory -Force
+          @"
+          [registries.zuper-registry]
+          token = "${{ secrets.CARGO_REGISTRY_TOKEN }}"
+          "@ | Out-File -FilePath "$env:CARGO_HOME\credentials.toml" -Encoding utf8
+          @"
+          [registries.zuper-registry]
+          index = "${{ secrets.CARGO_REGISTRY_URL }}"
+          [registry]
+          global-credential-providers = ["cargo:token"]
+          "@ | Out-File -FilePath "$env:CARGO_HOME\config.toml" -Encoding utf8
+        shell: powershell
        
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
