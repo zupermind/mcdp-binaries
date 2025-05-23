@@ -40,7 +40,7 @@ jobs:
             target: aarch64-apple-darwin
             platform: macos15
             arch: arm64
-          - os: windows-11
+          - os: windows-latest
             target: x86_64-pc-windows-msvc
             platform: windows
             arch: amd64
@@ -191,7 +191,9 @@ jobs:
               shasum -a 256 ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }} > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.sha256
             fi
           elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            certutil -hashfile ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe SHA256 | findstr /v "hash" > ${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe.sha256
+            BINARY_FILE="${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe"
+            # Use PowerShell for more reliable Windows hash generation
+            powershell -Command "(Get-FileHash -Algorithm SHA256 '${BINARY_FILE}').Hash.ToLower() + '  ${BINARY_FILE}'" > "${BINARY_FILE}.sha256"
           fi
 
       - name: Upload artifacts
