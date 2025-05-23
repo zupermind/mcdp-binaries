@@ -162,6 +162,7 @@ jobs:
 
       - name: Get version from tag
         id: get_version
+        shell: bash
         run: |
           echo "Debug: GITHUB_REF = $GITHUB_REF"
           echo "Debug: GITHUB_REF_NAME = $GITHUB_REF_NAME"
