@@ -2270,9 +2270,9 @@ dependencies = [
 
 [[package]]
 name = "mcdp-format2-rust"
-version = "2.12.2505221315"
+version = "2.12.2505231900"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "b6bed5f7ac69c3c038e1ded5ef56c3abaf05c84503f5d41b3979ec48dd9e70cd"
+checksum = "416c6d90d8ad0daa80265e466d429115029e98e33ff4937059b66ab20893f684"
 dependencies = [
  "anyhow",
  "clap",
@@ -3819,7 +3819,6 @@ dependencies = [
  "memchr",
  "once_cell",
  "percent-encoding",
- "rustls",
  "serde",
  "serde_json",
  "sha2",
@@ -3831,7 +3830,6 @@ dependencies = [
  "tracing",
  "url",
  "uuid",
- "webpki-roots 0.26.11",
 ]
 
 [[package]]
@@ -6043,9 +6041,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-build-daemon"
-version = "7.2.2505231009"
+version = "7.2.2505231900"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "5e6c1ae001125cb83b746bbfed0a551b4cd9240f38c334525e9bfdd60c6ffdde"
+checksum = "a9f862517d9399ce92db798a7f77df42d7fa28125c08a032500696b1a028a75a"
 dependencies = [
  "axum 0.8.4",
  "cargo_toml",
@@ -6069,9 +6067,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-cbor-utils"
-version = "7.2.2505221315"
+version = "7.2.2505231900"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "41737b49ffdcc6c1300b22903de89316f26b2cea307e5caa084bb6a8b63e8e2b"
+checksum = "b90e2ff9ac35e5b47ccd0d4154281226f234acadeb5a226b52ad56437d1ea28d"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -6087,9 +6085,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-mcdp-cli"
-version = "7.2.2505231229"
+version = "7.2.2505231900"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "5976478474564e9a6c423cac5af6f82533678367b3288fffa0f2a61c86e119e9"
+checksum = "8afbf6855ef181d20650f05ad907e118dacbbe4b787ffb59d8284d0b45166312"
 dependencies = [
  "anyhow",
  "chrono",
@@ -6116,9 +6114,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-mcdp-compiler"
-version = "7.2.2505231514"
+version = "7.2.2505231900"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "f1d901a4a38282b85d068e7f2ddd0678f7845d8f351806c5614fc1e6959ab3c7"
+checksum = "1a97e4307d33614135975db9119a544d3da32efaf6ee9f6c28a8d4517cef29c8"
 dependencies = [
  "anyhow",
  "blake3",
@@ -6145,6 +6143,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "syn 2.0.101",
+ "tempfile",
  "textwrap",
  "tokio",
  "tokio-util",
@@ -6161,9 +6160,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-mcdp-compiler-support"
-version = "7.2.2505231228"
+version = "7.2.2505231917"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "a4fbce8360a6d2b79f3f7eb137016aef4f033b63481c90d9d53f6a618f999dd6"
+checksum = "6f84f7d9ac7f0a1f6430b867530980ba2202ba4d81094a280e13e979da3405e6"
 dependencies = [
  "anyhow",
  "im",
@@ -6186,9 +6185,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-mcdp-core"
-version = "7.2.2505231237"
+version = "7.2.2505231900"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "634cad0ec815791b26d1ea3a8622613dbfb1a9b036f62d3c58bffa7e13a5b7c4"
+checksum = "47d094ad6c53dfa3f87b04e47ae342c9740efa647494e1adbe5d5513d4d3428d"
 dependencies = [
  "ansi-regex",
  "anyhow",
@@ -6239,9 +6238,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-mcdp-wasm"
-version = "7.2.2505221258"
+version = "7.2.2505231900"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "69580e99e4fc4c0926ac2cabc7ce07dab1eab3d9fafdcfcdbce33e50e48dea02"
+checksum = "980d53bbe3417db7b70e3c65df2b97fb0dcdc7a59aa4022c8b275c344d993a87"
 dependencies = [
  "anyhow",
  "wasmtime",
