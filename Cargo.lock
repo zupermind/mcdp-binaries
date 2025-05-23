@@ -6293,9 +6293,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-mcdp-compiler"
-version = "7.2.2505222228"
+version = "7.2.2505231316"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "b277f12ac98d020d7898ab89ed725ceecdca318c7d8550b0ca119d5f1bd18906"
+checksum = "d6ef9f710208a03e9e888959e72b9be953e6b273d6b562565e64139fb3e8ed66"
 dependencies = [
  "anyhow",
  "blake3",
