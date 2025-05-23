@@ -2425,7 +2425,7 @@ checksum = "4facc753ae494aeb6e3c22f839b158aebd4f9270f55cd3c79906c45476c47ab4"
 
 [[package]]
 name = "mcdp-cli"
-version = "2025.1.0"
+version = "25.1.0"
 dependencies = [
  "anyhow",
  "env_logger",
@@ -6498,9 +6498,9 @@ dependencies = [
 
 [[package]]
 name = "zuper-rs-mcdp-cli"
-version = "7.2.2505230956"
+version = "7.2.2505231229"
 source = "sparse+https://artifactory.zuper.ai/repository/cargo-virtual-stage/"
-checksum = "6886ad00e9e83c02dfbf4e4e8703d7a986436720011daf95ebdf37e6766110f4"
+checksum = "5976478474564e9a6c423cac5af6f82533678367b3288fffa0f2a61c86e119e9"
 dependencies = [
  "anyhow",
  "chrono",

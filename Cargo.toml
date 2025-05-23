@@ -1,6 +1,6 @@
 [package]
 name = "mcdp-cli"
-version = "2025.1.0"
+version = "25.1.0"
 edition = "2024"
 authors = ["Andrea Censi <andreacensi@users.noreply.github.com>"]
 description = "MCDP CLI interface"
