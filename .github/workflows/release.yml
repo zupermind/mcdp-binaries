@@ -162,13 +162,30 @@ jobs:
 
       - name: Get version from tag
         id: get_version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          echo "Debug: GITHUB_REF = $GITHUB_REF"
+          echo "Debug: GITHUB_REF_NAME = $GITHUB_REF_NAME"
+          
+          # Extract version more robustly
+          if [[ "$GITHUB_REF" =~ refs/tags/v(.+) ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          elif [[ "$GITHUB_REF" =~ refs/tags/(.+) ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          else
+            # Fallback to ref name
+            VERSION="$GITHUB_REF_NAME"
+            # Remove 'v' prefix if present
+            VERSION="${VERSION#v}"
+          fi
+          
+          echo "Extracted version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Rename binary
         shell: bash
         run: |
           mkdir -p release
-          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+          if [[ "${{ runner.os }}" == "Windows" || "${{ matrix.target }}" == *"windows"* ]]; then
             cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}.exe release/${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.exe
           else
             cp target/${{ matrix.target }}/release/${{ env.BINARY_NAME }} release/${{ env.BINARY_NAME }}-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
